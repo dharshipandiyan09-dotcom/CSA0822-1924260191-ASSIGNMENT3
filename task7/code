@@ -1,1 +1,82 @@
+import re 
+contacts = [ 
+    { 
+        "name": "Dr. Ravi", 
+        "phones": ["+91 98400 12345"], 
+        "emails": ["ravi@gmail.com"] 
+    }, 
+    { 
+        "name": "Ravi Kumar", 
+        "phones": ["9840012345"], 
+        "emails": ["ravi@gmail.com"] 
+    }, 
+    { 
+        "name": "Anu", 
+        "phones": ["9876543210"], 
+
+        "emails": ["anu@gmail.com"] 
+    }, 
+    { 
+        "name": "Anu", 
+        "phones": ["+91 98765 43210"], 
+        "emails": ["anu@gmail.com"] 
+    } 
+] 
+def normalize_phone(phone): 
+    return re.sub(r'\D', '', phone)[-10:] 
+def normalize_name(name): 
+    return " ".join(name.lower().split()) 
+merged = [] 
+lookup = {} 
+for contact in contacts: 
+    phones = { 
+        normalize_phone(p) for p in contact["phones"] 
+    } 
+    emails = { 
+        e.strip().lower() for e in contact["emails"] 
+    } 
+    keys = ( 
+        {"P:" + p for p in phones} 
+        | {"E:" + e for e in emails} 
+    ) 
+    existing = { 
+        lookup[k] for k in keys if k in lookup 
+    } 
+    if existing: 
+        index = min(existing) 
+        person = merged[index] 
+        for other in sorted(existing - {index}, reverse=True): 
+
+            person["names"].update(merged[other]["names"]) 
+            person["phones"].update(merged[other]["phones"]) 
+            person["emails"].update(merged[other]["emails"]) 
+            merged.pop(other) 
+            for k, v in list(lookup.items()): 
+                if v == other: 
+                    lookup.pop(k) 
+            # Correct shifted indexes after removal (moved inside the loop where 'other' is defined) 
+            for k, v in list(lookup.items()): 
+                if v > other: 
+                    lookup[k] = v - 1 
+    else: 
+        index = len(merged) 
+        person = { 
+            "names": set(), 
+            "phones": set(), 
+            "emails": set() 
+        } 
+        merged.append(person) 
+    person["names"].add(contact["name"].strip()) 
+    person["phones"].update(phones) 
+    person["emails"].update(emails) 
+    for p in person["phones"]: 
+        lookup["P:" + p] = index 
+    for e in person["emails"]: 
+        lookup["E:" + e] = index 
+print("MERGED CONTACTS") 
+for person in merged: 
+    print("Names:", sorted(person["names"])) 
+    print("Phones:", sorted(person["phones"])) 
+    print("Emails:", sorted(person["emails"])) 
+    print() 
 
