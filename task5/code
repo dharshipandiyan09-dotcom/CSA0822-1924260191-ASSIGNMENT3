@@ -1,1 +1,30 @@
+from time import perf_counter 
+readings = [5, 10, 55, -60, 3, 9, 51, 7, 1, 6] 
+# Method 1: Using for loop 
+valid_loop = [] 
+for temp in readings: 
+    if -50 <= temp <= 50: 
+        valid_loop.append(temp) 
+# Method 2: List comprehension 
+valid_comp = [ 
+    temp for temp in readings 
+    if -50 <= temp <= 50 
+] 
+# Method 3: Map and filter 
+valid_map = list(filter( 
+    lambda x: -50 <= x <= 50, readings 
+)) 
+fahrenheit = [ 
+    (temp * 9/5) + 32 for temp in valid_comp 
+] 
+# Alarm minutes (1-based) 
+alarms = [ 
+    i + 1 for i, temp in enumerate(valid_comp) 
+    if not 2 <= temp <= 8 
+] 
+print("Valid Celsius:", valid_comp) 
+print("Fahrenheit:", fahrenheit) 
+print("Alarm Minutes:", alarms) 
+print("All methods equal:", 
+      valid_loop == valid_comp == valid_map) 
 
